@@ -44,11 +44,12 @@ const getAllVideos = asyncHandler( async(req,res) => {
         filter.owner = userId
     }
 
-    const sortOrder = await Video.find(filter)
-        .populate("owner", "username fullname avatar")
-        .sort({ [sortBy]: sortOrder })
-        .skip((pageNumber - 1) * limitNumber)
-        .limit(limitNumber)
+    const sortDirection = sortType === "asc" ? 1 : -1;
+    const videos = await Video.find(filter)
+    .populate("owner", "username fullName avatar")
+    .sort({ [sortBy]: sortDirection })
+    .skip((pageNumber - 1) * limitNumber)
+    .limit(limitNumber);
 
     const totalVideos = await Video.countDocuments(filter)
 
@@ -102,7 +103,7 @@ const publishAVideo = asyncHandler(async (req,res) => {
         throw new ApiError(500, "Thumbnail upload failed")
     }
 
-    const video = await video.create({
+    const video = await Video.create({
         videoFile: videoFile.url,
         thumbnail: thumbnail.url,
         title,
